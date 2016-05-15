@@ -1,7 +1,5 @@
 # pycourses
 
-# pycourses
-
 Pycourses is a MOOC API .
 
 To utilise thi API properly you'll need to follow the syntax mentioned below :-
