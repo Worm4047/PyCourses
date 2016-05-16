@@ -38,22 +38,23 @@ def AllCourseFromCoursera():
     start = request.args.get('start')
     limit = request.args.get('limit')
     coursera = coursera_all_courses(start, limit)
-    return dumps(coursera)
+    c={"courses":coursera}
+    return dumps(c,indent=4, sort_keys=True)
 
 
 @app.route('/course/api/v1.0/courses/udacity', methods=['GET'])
 def AllCourseFromUdacity():
     udacity = udacity_all_courses()
-    ud = str(udacity).encode('utf-8')
-    return dumps(ud)
+    c={"courses":udacity}
+    return dumps(c,indent=4, sort_keys=True)
 
 
 @app.route('/course/api/v1.0/courses/udemy', methods=['GET'])
 def AllCourseFromUdemy():
     size = request.args.get('size')
     udemy = udemy_all_courses(size)
-    ud = str(udemy).encode('utf-8')
-    return dumps(ud)
+    c={"courses":udemy}
+    return dumps(c,indent=4, sort_keys=True)
 
 
 @app.route('/course/api/v1.0/courses/<string:course_name>',
@@ -62,12 +63,9 @@ def CourseFromAllProviders(course_name, charset='utf-8'):
     coursera = coursera_course(course_name)
     udemy = udemy_course(course_name)
     udacity = udacity_course(course_name)
-    print type(udacity)
-    print type(udemy)
-    print type(coursera)
-    ud = str(udacity).encode('utf-8')
-    x = dumps(coursera) + dumps(ud) + dumps(udemy)
-    return x
+    x = coursera+udemy+udacity
+    c={"courses":x}
+    return dumps(c,indent=4, sort_keys=True)
 
 
 @app.route('/course/api/v1.0/courses/<string:provider_name>/<string:course_name>'
@@ -75,14 +73,16 @@ def CourseFromAllProviders(course_name, charset='utf-8'):
 def CourseFromProvider(course_name, provider_name):
     if provider_name.lower() == 'coursera':
         coursera = coursera_course(course_name)
-        return dumps(coursera)
+        c={"courses":coursera}
+        return dumps(c,indent=4, sort_keys=True)
     if provider_name.lower() == 'udemy':
         udemy = udemy_course(course_name)
-        return dumps(udemy)
+        c={"courses":udemy}
+        return dumps(c,indent=4, sort_keys=True)
     if provider_name.lower() == 'udacity':
         udacity = udacity_course(course_name)
-        ud = str(udacity).encode('utf-8')
-        return dumps(ud)
+        c={"courses":udacity}
+        return dumps(c,indent=4, sort_keys=True)
 
 
 def coursera_store_course(item):
@@ -144,9 +144,10 @@ def coursera_all_courses(start, limit):
 def udacity_store_course(item, course2):
     name = item['title']
     url = item['homepage']
-    description = item['summary']
+    course2=course2.lower()
     course = {}
-    if course2 in description.lower():
+    if course2 in item['summary'].lower():
+        description = "Null"
         course = {
             'name': name,
             'url': url,
@@ -155,6 +156,36 @@ def udacity_store_course(item, course2):
             'price': 'Null',
             }
         return course
+    elif course2 in item['syllabus'].lower():
+        description = "Null"
+        course = {
+            'name': name,
+            'url': url,
+            'description': description,
+            'provider': 'udacity',
+            'price': 'Null',
+            }
+        return course
+    elif course2 in item['short_summary'].lower():
+        description = "Null"
+        course = {
+            'name': name,
+            'url': url,
+            'description': description,
+            'provider': 'udacity',
+            'price': 'Null',
+            }
+        return course    
+    elif course2 in item['expected_learning'].lower():
+        description = "Null"
+        course = {
+            'name': name,
+            'url': url,
+            'description': description,
+            'provider': 'udacity',
+            'price': 'Null',
+            }
+        return course             
     else:
         return 0
 
@@ -162,7 +193,7 @@ def udacity_store_course(item, course2):
 def udacity_store_course2(item):
     name = item['title']
     url = item['homepage']
-    description = item['summary']
+    description = "Null"
     course = {}
     course = {
         'name': name,
@@ -230,7 +261,7 @@ def udemy_course(course):
     json_result = loads(results)
     for item in json_result['results']:
         udemy_courses.append(udemy_store_course(item))
-    return dumps(udemy_courses)
+    return udemy_courses
 
 
 def udemy_all_courses(size):
@@ -248,7 +279,7 @@ def udemy_all_courses(size):
     json_result = loads(results)
     for item in json_result['results']:
         udemy_courses.append(udemy_store_course(item))
-    return dumps(udemy_courses)
+    return udemy_courses
 
 
 if __name__ == '__main__':
